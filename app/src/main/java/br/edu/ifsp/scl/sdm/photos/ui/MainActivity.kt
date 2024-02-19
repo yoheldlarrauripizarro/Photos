@@ -1,13 +1,18 @@
 package br.edu.ifsp.scl.sdm.photos.ui
 
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
+import android.widget.ImageView
+import android.widget.Toast
 import br.edu.ifsp.scl.sdm.photos.R
 import br.edu.ifsp.scl.sdm.photos.adapter.PhotoAdapter
 import br.edu.ifsp.scl.sdm.photos.databinding.ActivityMainBinding
+import br.edu.ifsp.scl.sdm.photos.model.JsonPlaceHolder
 import br.edu.ifsp.scl.sdm.photos.model.Photo
+import com.android.volley.toolbox.ImageRequest
 
 class MainActivity : AppCompatActivity() {
     private val amb: ActivityMainBinding by lazy {
@@ -26,7 +31,7 @@ class MainActivity : AppCompatActivity() {
             title = getString(R.string.app_name)
         })
 
-        /*amb.photosSp.apply {
+        amb.photosSp.apply {
             adapter = photoAdapter
             onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
                 override fun onItemSelected(
@@ -35,16 +40,51 @@ class MainActivity : AppCompatActivity() {
                     position: Int,
                     id: Long
                 ) {
-                        val size = productImageList.size
-                    productImageList.clear()
-                    productImageAdapter.notifyItemRangeRemoved(0,size)
-                    retrieveProductsImages(productList[position])
+                    retrieveImage(photoList[position].url, amb.imageUrlIv)
+                    retrieveImage(photoList[position].thumbnailUrl, amb.imageThumbnailIv)
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                     //NSA
                 }
             }
-        }*/
+        }
+
+        retrievePhotosList()
+    }
+
+    private fun retrievePhotosList() =
+        JsonPlaceHolder.PhotoListRequest({ photoList ->
+            photoList.also {
+                photoAdapter.addAll(it)
+            }
+        }, {
+            Toast.makeText(
+                this,
+                getString(R.string.request_problem),
+                Toast.LENGTH_SHORT
+            ).show()
+        }).also {
+            JsonPlaceHolder.getInstance(this).addToRequestQueue(it)
+        }
+    private fun retrieveImage(imageUrl: String, view: ImageView) {
+        ImageRequest(
+            imageUrl,
+            { response ->
+                view.setImageBitmap(response)
+            },
+            0,
+            0,
+            ImageView.ScaleType.CENTER,
+            Bitmap.Config.ARGB_8888,
+            {
+                Toast.makeText(
+                    this,
+                    getString(R.string.request_problem),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }).also {
+            JsonPlaceHolder.getInstance(this).addToRequestQueue(it)
+        }
     }
 }
