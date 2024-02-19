@@ -1,6 +1,6 @@
 package br.edu.ifsp.scl.sdm.photos.model
 
-data class PhotoListItem(
+data class Photo(
     val albumId: Int,
     val id: Int,
     val thumbnailUrl: String,
